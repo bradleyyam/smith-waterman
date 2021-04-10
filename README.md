@@ -1,11 +1,11 @@
 # Smith-Waterman Algorithm
 
-This implementation uses the optimized wavefront method and runs in O(n) time. References can be found here: 
+This implementation uses the optimized wavefront method and runs in O(n) time. References can be found here:  
 See reference paper here: https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/btaa777/5904262, some nice illustrations here: http://cs.rhodes.edu/welshc/COMP465_F16/Lecture10.pdf and the basic idea here: https://en.wikipedia.org/wiki/Smith%E2%80%93Waterman_algorithm 
 
-To install with pip, call pip3 install git+git://github.com/bradleyyam/smith-waterman.git
+To install with pip, call pip3 install git+git://github.com/bradleyyam/smith-waterman.git  
 
-Otherwise, clone directly into your machine and follow the usage norms: 
+Otherwise, clone directly into your machine and follow the usage norms:   
 
 ```
 ### Usage: python src/main.py -i <input file> -s <score file>
@@ -14,19 +14,19 @@ Otherwise, clone directly into your machine and follow the usage norms:
 
 # Folder Structure
 
-The scripts are in /src, including another version of the same algorithm that doesn't allow double extensions in two directions.
-The sample data are in /data, including score matrices and input sequences.
-The output results are in /results. These can be compared with sample-output1.txt and sample-output2.txt in the /data folder.
-The other scripts for setup are in /swalign for pip install compatibility.
-Other reference files are in /ref.
+The scripts are in /src, including another version of the same algorithm that doesn't allow double extensions in two directions.  
+The sample data are in /data, including score matrices and input sequences.  
+The output results are in /results. These can be compared with sample-output1.txt and sample-output2.txt in the /data folder.  
+The other scripts for setup are in /swalign for pip install compatibility.  
+Other reference files are in /ref.  
 
 # API
 
-There is one method: runSW(inputFile, scoreFile, openGap, extGap):
-    It takes the string of the input file location,
-    the string of the score file location,
-    a negative penalty for opening a gap
-    and a negative penalty for extending a gap.
+There is one method: runSW(inputFile, scoreFile, openGap, extGap):  
+    It takes the string of the input file location,  
+    the string of the score file location,  
+    a negative penalty for opening a gap  
+    and a negative penalty for extending a gap.  
 
 # Data Structures
 

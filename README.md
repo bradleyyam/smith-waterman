@@ -15,6 +15,8 @@ Otherwise, clone directly into your machine and follow the usage norms:
 The scripts are in /src, including another version of the same algorithm that doesn't allow double extensions in two directions.
 The sample data are in /data, including score matrices and input sequences.
 The output results are in /results. These can be compared with sample-output1.txt and sample-output2.txt in the /data folder.
+The other scripts for setup are in /swalign for pip install compatibility.
+Other reference files are in /ref.
 
 # API
 

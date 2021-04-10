@@ -7,8 +7,10 @@ To install with pip, call pip3 install git+git://github.com/bradleyyam/smith-wat
 
 Otherwise, clone directly into your machine and follow the usage norms: 
 
+```
 ### Usage: python src/main.py -i <input file> -s <score file>
 ### Example: python src/main.py -i input.txt -s blosum62.txt
+```
 
 # Folder Structure
 
@@ -28,6 +30,7 @@ There is one method: runSW(inputFile, scoreFile, openGap, extGap):
 
 # Data Structures
 
+```
 ## SW Class Matrix
 
 The SWMatrix holds all the information and methods needed to find the best local alignments. For efficiency, it uses seven matrices (four alignment and three traceback) and runs in O(n) time. 
@@ -44,7 +47,9 @@ The SWMatrix is broken down into the following parts:
 ### TM: This is the first traceback matrix for matches. For every given match in the M matrix, it contains a number from 0-3 indicating where the previous value came from, 0 represents the M matrix, 1 represents the Ix matrix, and 2 represents the Iy matrix, 3 represents that the max was the arbitrary 0 value and hence a halt to the traceback.
 ### TIx: This is the second traceback matrix for extensions along any column, the numbers and their meanings are the same as the M matrix.
 ### TIy: This is the third traceback matrix for extensions along any row, the numbers and their meanings are the same as the previous two matrices.
+```
 
+```
 ## Methods
 
 ### __init__ intializes the matrix with the score matrix, the two sequences, and the gap and extension penalties.
@@ -66,5 +71,5 @@ The SWMatrix is broken down into the following parts:
 
 ### traceback enables us to reconstruct the optimal alignment by tracing our steps back through the three matrices. 0-3 represents states, but also matrices, each state corresponds to a matrix, hence the state tells us which matrix to reference for any given [i, j] coordinate.
 ### Since the states also tell us if it is a match or an extension and in which direction, we can use state information to directly rebuild the sequence alignment.
-
+```
 

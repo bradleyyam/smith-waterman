@@ -1,13 +1,13 @@
 from setuptools import setup
 
 setup(
-    name='ptolemaios',
+    name='swalign',
     version='0.0.1',
-    description='My private package from private github repo',
-    url='git@github.com:rfschubert/ptolemaios-sdk-package.git',
-    author='Raphael Schubert',
-    author_email='raphael.schubert@digitalbankscorp.com',
-    license='unlicense',
-    packages=['ptolemaios'],
+    description='An implementation of the Smith-Waterman algorithm for determining optimal local alignment between two sequences given a similarity matrix.',
+    url='git@github.com/bradleyyam/smith-waterman.git',
+    author='Bradley Yam',
+    author_email='bradley.yam@yale.edu',
+    license='GPL',
+    packages=['swalign'],
     zip_safe=False
 )

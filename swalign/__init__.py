@@ -50,7 +50,6 @@ class SWMatrix:
                 b = self.Ix.iat[i-1, j-1] + score #insertion in x
                 c = self.Iy.iat[i-1, j-1] + score #insertion in y
                 ret1 = max([a, b, c, 0])
-                # if i == 46 and j == 37: print(i, j, a, b, c, score)
                 self.M.iat[i,j] = ret1 
                 #a number from 0-3 will tell us where the sequence came from
                 self.TM.iat[i,j] = [a,b,c,0].index(ret1) 
@@ -58,20 +57,20 @@ class SWMatrix:
                 #compute the score for the Ix matrix
                 a = self.M.iat[i-1,j] + self.o #open gap in x
                 b = self.Ix.iat[i-1,j] + self.e #extend gap in x
-                ret2 = max([a, b, -1, 0]) #magic to make state match with matrix
-                # if i == 46 and j == 37: print(i, j, a, b)
+                c = self.Iy.iat[i-1,j] + self.o #open gap after existing gap in y
+                ret2 = max([a, b, c, 0]) #magic to make state match with matrix
                 self.Ix.iat[i,j] = ret2
                 #a number from 0-2 will tell us where the sequence came from
-                self.TIx.iat[i,j] = [a,b,-1,0].index(ret2) 
+                self.TIx.iat[i,j] = [a,b,c,0].index(ret2) 
 
                 #compute the score for the Iy matrix
                 a = self.M.iat[i,j-1] + self.o #open gap in y
-                b = self.Iy.iat[i,j-1] + self.e#extend gap in y
-                ret3 = max([a, -1, b, 0])
+                b = self.Ix.iat[i,j-1] + self.o #open gap after existing gap in x
+                c = self.Iy.iat[i,j-1] + self.e#extend gap in y
+                ret3 = max([a, b, c, 0])
                 self.Iy.iat[i,j] = ret3
-                # if i == 46 and j == 37: print(i, j, a, b)
                 #a number from 0-2 will tell us where the sequence came from
-                self.TIy.iat[i,j] = [a,-1,b,0].index(ret3) 
+                self.TIy.iat[i,j] = [a,b,c,0].index(ret3) 
 
                 #get best score
                 self.F.iat[i,j] = max([ret1, ret2, ret3])
@@ -185,10 +184,6 @@ def runSW(inputFile, scoreFile, openGap, extGap):
  ### calculation
     m.fillMatrix()
     m.traceback(0,0)
-
-    # print(m.M.iloc[44:47, 35:38])
-    # print(m.Ix.iloc[44:47, 35:38])
-    # print(m.Iy.iloc[44:47, 35:38])
 
  ### write output
     seqHeader = "-----------\n|Sequences|\n-----------"

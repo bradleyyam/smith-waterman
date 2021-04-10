@@ -6,53 +6,14 @@ __copyright__ = "Copyright 2021"
 __license__ = "GPL"
 __version__ = "1.0.0"
 
-### Usage: python src/main.py -i <input file> -s <score file>
-### Example: python src/main.py -i input.txt -s blosum62.txt
-### Requirements: pandas
-### Run command in root folder of the project.
-### Note: Smith-Waterman Algorithm (Wavefront Optimization)
+### Usage: python main.py -i <input file> -s <score file>
+### Example: python main.py -i input.txt -s blosum62.txt
+### Note: Smith-Waterman Algorithm
 
 import argparse
 import pandas as pd
 
 # SW Class Matrix
-
-# The SWMatrix holds all the information and methods needed to find the best local alignments. For efficiency, it uses seven matrices (four alignment and three traceback) and runs in O(n) time. 
-# The SWMatrix is broken down into the following parts:
-## score: contains the score matrix which determines the affinity between any two symbols
-## o: is the penalty for opening a gap
-## e: is the penalty for extending a gap
-## seq1: is the first sequence prepended with a tab.
-## seq2: is the second sequence prepended with a tab.
-## F: This matrix contains all the final scores for every position, including matches and extensions. This is the matrix we print to the display at the very end. At each step, it saves the max of the other three alignment matrices at the same coordinates.
-## M: This matrix contains all the alignment scores for matches at every position. This means that every number in this matrix represents a match between two symbols.
-## Ix: This matrix contains all the alignment scores for extensions along any column (or along any x value). Every number in this matrix represents either extending an open gap or creating a new one along a column.
-## Iy: This matrix contains all the alignment scores for extensions along any row (or along any y value). Every number in this matrix represents either extending an open gap or creating a new one along a row.
-## TM: This is the first traceback matrix for matches. For every given match in the M matrix, it contains a number from 0-3 indicating where the previous value came from, 0 represents the M matrix, 1 represents the Ix matrix, and 2 represents the Iy matrix, 3 represents that the max was the arbitrary 0 value and hence a halt to the traceback.
-## TIx: This is the second traceback matrix for extensions along any column, the numbers and their meanings are the same as the M matrix.
-## TIy: This is the third traceback matrix for extensions along any row, the numbers and their meanings are the same as the previous two matrices.
-
-# Methods
-
-## __init__ intializes the matrix with the score matrix, the two sequences, and the gap and extension penalties.
-## fillMatrix uses a dynamic programming algorithm to calculate the scores in all seven matrices. This is done as an optimization of the basic Smith-Waterman Algorithm using a wavefront.
-### In the basic Smith-Waterman Algorithm, each cell in the final matrix is computed by taking the max of the the cell in the [i-1, j-1] position + affinity score, any cell in [i, k] for k < j or any cell in [l, j] for l < i + opening gap + extension gap * (i-l-1) or (j-k-1), or 0 (to get the local alignment).
-### The optimized Smith-Waterman Algorithm effectively does the same thing, but using thre matrices we already know the optimal value of any match or extension up till the [i, j] cell, therefore, the algorithm doesn't need to look across all l or j.
-### The optimized algorithm only needs to look for matches in [i-1, j], [i-1, j-1], [i, j-1], and gap openings or extensions in [i-1, j] and [j-1, i]. The maximum values have been precomputed.
-### The tradeoff of such an algorithm is the extra space needed to hold three traceback matrices, as each alignment matrix needs to know which other matrix it came from. This is commonly known as the wavefront method. See reference paper here: https://academic.oup.com/bioinformatics/advance-article/doi/10.1093/bioinformatics/btaa777/5904262, some nice illustrations here: http://cs.rhodes.edu/welshc/COMP465_F16/Lecture10.pdf
-### The optimized time is O(n) from a O(n^2) runtime.
-### Additionally, the algorithm is also configurable to subtle changes such as: do we allow consecutive extensions in orthogonal directions, or must a match happen before this happens? Is this scored as a double extension, or as another gap? 
-
-## getMax returns the maximum value in the F matrix, i.e. the best alignment score.
-
-## getMaxCoord returns the coordinates of the maximum value in the matrix. This is used in the traceback function. 
-
-## completeFront is a helper function in the traceback function to add the rest of the symbols on the front of the completed alignment
-
-## completeBack is a helper function in the traceback function to add the rest of the symbols on the back of the completed alignment
-
-## traceback enables us to reconstruct the optimal alignment by tracing our steps back through the three matrices. 0-3 represents states, but also matrices, each state corresponds to a matrix, hence the state tells us which matrix to reference for any given [i, j] coordinate.
-### Since the states also tell us if it is a match or an extension and in which direction, we can use state information to directly rebuild the sequence alignment.
 
 class SWMatrix:
     def __init__(self, score, seq1, seq2, openGap=-2, extGap=-1):
@@ -89,6 +50,7 @@ class SWMatrix:
                 b = self.Ix.iat[i-1, j-1] + score #insertion in x
                 c = self.Iy.iat[i-1, j-1] + score #insertion in y
                 ret1 = max([a, b, c, 0])
+                # if i == 46 and j == 37: print(i, j, a, b, c, score)
                 self.M.iat[i,j] = ret1 
                 #a number from 0-3 will tell us where the sequence came from
                 self.TM.iat[i,j] = [a,b,c,0].index(ret1) 
@@ -96,32 +58,35 @@ class SWMatrix:
                 #compute the score for the Ix matrix
                 a = self.M.iat[i-1,j] + self.o #open gap in x
                 b = self.Ix.iat[i-1,j] + self.e #extend gap in x
-                c = self.Iy.iat[i-1,j] + self.o #open gap after existing gap in y
-                ret2 = max([a, b, c, 0]) #magic to make state match with matrix
+                ret2 = max([a, b, -1, 0]) #magic to make state match with matrix
+                # if i == 45 and j == 37: print(i, j, a, b)
                 self.Ix.iat[i,j] = ret2
                 #a number from 0-2 will tell us where the sequence came from
-                self.TIx.iat[i,j] = [a,b,c,0].index(ret2) 
+                self.TIx.iat[i,j] = [a,b,-1,0].index(ret2) 
 
                 #compute the score for the Iy matrix
                 a = self.M.iat[i,j-1] + self.o #open gap in y
-                b = self.Ix.iat[i,j-1] + self.o #open gap after existing gap in x
-                c = self.Iy.iat[i,j-1] + self.e#extend gap in y
-                ret3 = max([a, b, c, 0])
+                b = self.Iy.iat[i,j-1] + self.e #extend gap in y
+                ret3 = max([a, -1, b, 0])
                 self.Iy.iat[i,j] = ret3
+                # if i == 46 and j == 37: print(i, j, a, b)
                 #a number from 0-2 will tell us where the sequence came from
-                self.TIy.iat[i,j] = [a,b,c,0].index(ret3) 
+                self.TIy.iat[i,j] = [a,-1,b,0].index(ret3) 
 
                 #get best score
                 self.F.iat[i,j] = max([ret1, ret2, ret3])
 
+    #returns the highest score in the matrix
     def getMax(self):
         return self.F.max().max()
 
+    #returns the coordinates of the highest score in the matrix
     def getMaxCoord(self):
         i = self.F.max(axis=1).argmax()
         j = self.F.iloc[i].argmax()
         return i, j
 
+    #fills out the front of the alignemnt
     def completeFront(self, i, j):
         self.matchStr1.append('(')
         self.matchStr2.append('(')
@@ -139,6 +104,7 @@ class SWMatrix:
             i -= 1
             j -= 1
     
+    #fills out the back of the alignemnt
     def completeBack(self, i, j):
         self.matchStr1.append(')')
         self.matchStr2.append(')')
@@ -156,6 +122,7 @@ class SWMatrix:
             i += 1
             j += 1
 
+    #beginning from the max coord, traces back based on the trace matrices to find the best local alignment
     def traceback(self, x, y):
         # 0 = M matrix, 1 = Ix matrix, 2 = Iy matrix
         state = 0
@@ -166,11 +133,14 @@ class SWMatrix:
         j = y
         i, j = self.getMaxCoord()
         currVal = self.M.iat[i,j]
+        #the algorithm will terminate when the score hits 0, i.e. state == 3 or currVal = 0.
+        #states represent the matching state, 0 = match, 1 = skip on the x-axis, 2 = skip on the y-axis, 3 = halt, traced from 0 minimum.
         while currVal != 0 and state != 3:
             if self.seq1[j] == self.seq2[i]:
                 self.matchLine.append('|')
             else:
                 self.matchLine.append(' ')
+            # print(state, i, j, self.seq1[j], self.seq2[i])
             if state == 0:
                 nstate = self.TM.iat[i,j]
                 self.matchStr1.append(self.seq1[j])
@@ -222,6 +192,10 @@ def runSW(inputFile, scoreFile, openGap, extGap):
  ### calculation
     m.fillMatrix()
     m.traceback(0,0)
+
+    # print(m.M.iloc[44:47, 35:38])
+    # print(m.Ix.iloc[44:47, 35:38])
+    # print(m.Iy.iloc[44:47, 35:38])
 
  ### write output
     seqHeader = "-----------\n|Sequences|\n-----------"

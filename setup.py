@@ -9,5 +9,8 @@ setup(
     author_email='bradley.yam@yale.edu',
     license='GPL',
     packages=['swalign'],
+    install_requires=[
+        'pandas',
+    ],
     zip_safe=False
 )

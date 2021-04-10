@@ -11,7 +11,6 @@ __version__ = "1.0.0"
 ### Note: Smith-Waterman Algorithm
 
 import argparse
-import numpy as np
 import pandas as pd
 
 # SW Class Matrix

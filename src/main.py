@@ -76,14 +76,17 @@ class SWMatrix:
                 #get best score
                 self.F.iat[i,j] = max([ret1, ret2, ret3])
 
+    #returns the highest score in the matrix
     def getMax(self):
         return self.F.max().max()
 
+    #returns the coordinates of the highest score in the matrix
     def getMaxCoord(self):
         i = self.F.max(axis=1).argmax()
         j = self.F.iloc[i].argmax()
         return i, j
 
+    #fills out the front of the alignemnt
     def completeFront(self, i, j):
         self.matchStr1.append('(')
         self.matchStr2.append('(')
@@ -101,6 +104,7 @@ class SWMatrix:
             i -= 1
             j -= 1
     
+    #fills out the back of the alignemnt
     def completeBack(self, i, j):
         self.matchStr1.append(')')
         self.matchStr2.append(')')
@@ -118,6 +122,7 @@ class SWMatrix:
             i += 1
             j += 1
 
+    #beginning from the max coord, traces back based on the trace matrices to find the best local alignment
     def traceback(self, x, y):
         # 0 = M matrix, 1 = Ix matrix, 2 = Iy matrix
         state = 0
@@ -128,6 +133,8 @@ class SWMatrix:
         j = y
         i, j = self.getMaxCoord()
         currVal = self.M.iat[i,j]
+        #the algorithm will terminate when the score hits 0, i.e. state == 3 or currVal = 0.
+        #states represent the matching state, 0 = match, 1 = skip on the x-axis, 2 = skip on the y-axis, 3 = halt, traced from 0 minimum.
         while currVal != 0 and state != 3:
             if self.seq1[j] == self.seq2[i]:
                 self.matchLine.append('|')
